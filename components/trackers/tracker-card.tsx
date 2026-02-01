@@ -102,10 +102,9 @@ export function TrackerCard({
                   className="h-10 w-10 rounded-xl flex items-center justify-center"
                   style={{ backgroundColor: `${tracker.color}15` }}
                 >
-                  <Icon
-                    className="h-5 w-5"
-                    style={{ color: tracker.color } as any}
-                  />
+                  <div style={{ color: tracker.color }}>
+                    <Icon className="h-5 w-5" />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">{tracker.title}</h3>

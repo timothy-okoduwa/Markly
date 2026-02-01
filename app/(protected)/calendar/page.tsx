@@ -256,10 +256,9 @@ export default function CalendarPage() {
                         className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: `${tracker.color}15` }}
                       >
-                        <Icon
-                          className="h-3 w-3"
-                          style={{ color: tracker.color } as any}
-                        />
+                        <div style={{ color: tracker.color }}>
+                          <Icon className="h-3 w-3" />
+                        </div>
                       </div>
                       <span className="text-[11px] font-medium truncate">
                         {tracker.title}
@@ -318,10 +317,9 @@ export default function CalendarPage() {
                       className="h-6 w-6 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: `${tracker.color}15` }}
                     >
-                      <Icon
-                        className="h-3.5 w-3.5"
-                        style={{ color: tracker.color } as any}
-                      />
+                      <div style={{ color: tracker.color }}>
+                        <Icon className="h-3.5 w-3.5" />
+                      </div>
                     </div>
                     <span className="text-xs font-semibold truncate">
                       {tracker.title}

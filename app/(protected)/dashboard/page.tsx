@@ -235,10 +235,9 @@ export default function DashboardPage() {
                     className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${habit.tracker.color}15` }}
                   >
-                    <Icon
-                      className="h-5 w-5"
-                      style={{ color: habit.tracker.color } as any}
-                    />
+                    <div style={{ color: habit.tracker.color }}>
+                      <Icon className="h-5 w-5" />
+                    </div>
                   </div>
 
                   {/* Content */}

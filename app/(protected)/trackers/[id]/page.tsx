@@ -368,10 +368,9 @@ export default function TrackerPage({ params }: TrackerPageProps) {
               className="h-11 w-11 rounded-2xl flex items-center justify-center"
               style={{ backgroundColor: `${tracker.color}15` }}
             >
-              <Icon
-                className="h-5.5 w-5.5"
-                style={{ color: tracker.color } as any}
-              />
+              <div style={{ color: tracker.color }}>
+                <Icon className="h-5.5 w-5.5" />
+              </div>
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">

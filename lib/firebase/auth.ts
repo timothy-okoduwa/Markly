@@ -8,6 +8,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
+  browserLocalPersistence,
+  setPersistence,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./config";
@@ -15,12 +17,24 @@ import { User } from "../types";
 
 const googleProvider = new GoogleAuthProvider();
 
-// Detect if user is on mobile
-const isMobile = () => {
+// Force account selection and enable offline access
+googleProvider.setCustomParameters({
+  prompt: "select_account",
+  access_type: "offline",
+});
+
+// Detect if user is on mobile or Safari
+const isMobileOrSafari = () => {
   if (typeof window === "undefined") return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  );
+
+  const userAgent = navigator.userAgent;
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent,
+    );
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+
+  return isMobile || isSafari;
 };
 
 // Handle user document creation/update
@@ -52,13 +66,16 @@ const handleUserDocument = async (user: FirebaseUser) => {
 
 export const signInWithGoogle = async (): Promise<FirebaseUser | null> => {
   try {
-    if (isMobile()) {
-      // Use redirect for mobile devices
+    // Set persistence to LOCAL to ensure session survives page reloads
+    await setPersistence(auth, browserLocalPersistence);
+
+    if (isMobileOrSafari()) {
+      // Use redirect for mobile devices and Safari
       await signInWithRedirect(auth, googleProvider);
       // Return null because redirect will reload the page
       return null;
     } else {
-      // Use popup for desktop
+      // Use popup for desktop (non-Safari)
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       await handleUserDocument(user);
@@ -75,6 +92,7 @@ export const checkRedirectResult = async (): Promise<FirebaseUser | null> => {
   try {
     const result = await getRedirectResult(auth);
     if (result?.user) {
+      console.log("Redirect result found:", result.user.email);
       await handleUserDocument(result.user);
       return result.user;
     }

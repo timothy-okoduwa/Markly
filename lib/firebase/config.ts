@@ -21,4 +21,7 @@ const app =
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Important: Ensure auth is ready before using
+auth.useDeviceLanguage();
+
 export default app;

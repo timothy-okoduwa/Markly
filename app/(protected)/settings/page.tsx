@@ -145,7 +145,7 @@ export default function SettingsPage() {
         className="text-center text-sm text-muted-foreground pb-6"
       >
         <p>Markly v1.0.0</p>
-        {/* <p className="mt-1">Built with Next.js, Firebase & shadcn/ui</p> */}
+        <p className="mt-1">Built By Timothy</p>
       </motion.div>
     </div>
   );

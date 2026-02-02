@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User as FirebaseUser } from "firebase/auth";
 import {
   onAuthChange,
@@ -15,58 +15,65 @@ export function useAuth() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [checkingRedirect, setCheckingRedirect] = useState(true);
+  const redirectCheckCompleted = useRef(false);
 
   useEffect(() => {
     let mounted = true;
 
-    // Check for redirect result first (for mobile/Safari)
-    const handleRedirect = async () => {
-      try {
-        setCheckingRedirect(true);
-        const redirectUser = await checkRedirectResult();
-        if (redirectUser && mounted) {
-          console.log("User signed in via redirect:", redirectUser.email);
-        }
-      } catch (err) {
-        console.error("Redirect result error:", err);
-        if (mounted) {
-          setError(
-            err instanceof Error ? err.message : "Failed to complete sign in",
-          );
-        }
-      } finally {
-        if (mounted) {
-          setCheckingRedirect(false);
+    const initialize = async () => {
+      // Only check redirect result once
+      if (!redirectCheckCompleted.current) {
+        redirectCheckCompleted.current = true;
+
+        try {
+          console.log("Initializing auth...");
+          const redirectUser = await checkRedirectResult();
+
+          if (redirectUser && mounted) {
+            console.log("✓ User from redirect:", redirectUser.email);
+            setUser(redirectUser);
+          }
+        } catch (err) {
+          console.error("❌ Redirect check error:", err);
+          if (mounted) {
+            setError(
+              err instanceof Error ? err.message : "Authentication failed",
+            );
+          }
         }
       }
+
+      // Set up auth state listener
+      const unsubscribe = onAuthChange((user) => {
+        if (mounted) {
+          console.log(
+            "Auth state change:",
+            user ? `✓ ${user.email}` : "✗ No user",
+          );
+          setUser(user);
+          setLoading(false);
+        }
+      });
+
+      return unsubscribe;
     };
 
-    handleRedirect();
-
-    const unsubscribe = onAuthChange((user) => {
-      if (mounted) {
-        console.log("Auth state changed:", user?.email || "No user");
-        setUser(user);
-        setLoading(false);
-      }
-    });
+    const unsubscribePromise = initialize();
 
     return () => {
       mounted = false;
-      unsubscribe();
+      unsubscribePromise.then((unsubscribe) => unsubscribe());
     };
   }, []);
 
   const login = async () => {
     try {
+      console.log("Login initiated");
       setError(null);
       setLoading(true);
       await signInWithGoogle();
-      // Note: On mobile/Safari, this will redirect and the page will reload
-      // On desktop, the user will be set via onAuthChange
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("❌ Login error:", err);
       setError(err instanceof Error ? err.message : "Failed to sign in");
       setLoading(false);
       throw err;
@@ -75,9 +82,11 @@ export function useAuth() {
 
   const logout = async () => {
     try {
+      console.log("Logout initiated");
       setError(null);
       await signOut();
     } catch (err) {
+      console.error("❌ Logout error:", err);
       setError(err instanceof Error ? err.message : "Failed to sign out");
       throw err;
     }
@@ -85,7 +94,7 @@ export function useAuth() {
 
   return {
     user,
-    loading: loading || checkingRedirect,
+    loading,
     error,
     login,
     logout,

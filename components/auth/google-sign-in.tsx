@@ -7,19 +7,38 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export function GoogleSignIn() {
-  const { login } = useAuth();
+  const { login, error } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showSafariTip, setShowSafariTip] = useState(false);
+
+  const isSafari = () => {
+    if (typeof window === "undefined") return false;
+    const ua = navigator.userAgent.toLowerCase();
+    return (
+      ua.indexOf("safari") !== -1 &&
+      ua.indexOf("chrome") === -1 &&
+      ua.indexOf("android") === -1
+    );
+  };
 
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
+      setShowSafariTip(false);
       await login();
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign in error:", error);
+
+      // Show Safari-specific tip if popup was blocked
+      if (isSafari() && error?.code === "auth/popup-blocked") {
+        setShowSafariTip(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -30,7 +49,18 @@ export function GoogleSignIn() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
+      className="space-y-4"
     >
+      {showSafariTip && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Please allow pop-ups for this site in Safari settings, then try
+            again.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Button
         onClick={handleSignIn}
         disabled={isLoading}

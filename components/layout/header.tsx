@@ -15,6 +15,8 @@ import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -40,7 +42,17 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500" />
+            <Link href="/dashboard">
+              <div className="h-8 w-8 rounded-lg overflow-hidden bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                <Image
+                  src="/logo.jpg"
+                  alt="Markly Logo"
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                />
+              </div>
+            </Link>
             <h1 className="text-xl font-bold tracking-tight">Markly</h1>
           </div>
         </div>

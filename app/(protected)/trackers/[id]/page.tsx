@@ -6,7 +6,7 @@ import { use, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTrackers } from "@/hooks/use-trackers";
 import { useEntries } from "@/hooks/use-entries";
-import { useStats } from "@/hooks/use-stats";
+import { StatsService } from "@/services/stats.service";
 import { StatsCard } from "@/components/stats/stats-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -201,7 +201,6 @@ export default function TrackerPage({ params }: TrackerPageProps) {
     addEntry,
     removeEntry,
   } = useEntries(trackerId);
-  const stats = useStats(entries);
 
   // The month the calendar is currently displaying
   const [calendarMonth, setCalendarMonth] = useState(new Date());
@@ -214,6 +213,27 @@ export default function TrackerPage({ params }: TrackerPageProps) {
 
   const tracker = trackers.find((t) => t.id === trackerId);
   const loading = trackersLoading || entriesLoading;
+
+  // ─── Calculate stats based on displayed calendar month ─────────────────
+  const stats = useMemo(() => {
+    const monthStart = startOfMonth(calendarMonth);
+    const monthEnd = endOfMonth(calendarMonth);
+    const monthStartStr = format(monthStart, "yyyy-MM-dd");
+    const monthEndStr = format(monthEnd, "yyyy-MM-dd");
+
+    // Filter entries for the displayed month for "This Month" stat
+    const monthEntries = entries.filter((e) => {
+      return e.date >= monthStartStr && e.date <= monthEndStr;
+    });
+
+    // Calculate full stats (for streaks and total)
+    const allStats = StatsService.calculateStats(entries);
+
+    return {
+      ...allStats,
+      monthlyCount: monthEntries.length, // Override with current month count
+    };
+  }, [entries, calendarMonth]);
 
   // ─── Count entries per date ─────────────────────────────────────────────
   const dateCountMap = useMemo(() => {

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function LoginPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -46,8 +47,15 @@ export default function LoginPage() {
             className="flex justify-center mb-8"
           >
             <div className="relative">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg" />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 blur-xl opacity-50" />
+              <div className="h-16 w-16 rounded-lg overflow-hidden bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                <Image
+                  src="/logo.jpg"
+                  alt="Markly Logo"
+                  width={120}
+                  height={120}
+                  className="object-cover"
+                />
+              </div>
             </div>
           </motion.div>
 
